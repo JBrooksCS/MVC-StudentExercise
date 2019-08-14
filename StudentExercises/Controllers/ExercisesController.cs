@@ -11,11 +11,11 @@ using StudentExercises.Models.ViewModels;
 
 namespace StudentExercises.Controllers
 {
-    public class InstructorsController : Controller
+    public class ExercisesController : Controller
     {
         private readonly IConfiguration _config;
 
-        public InstructorsController(IConfiguration config)
+        public ExercisesController(IConfiguration config)
         {
             _config = config;
         }
@@ -28,53 +28,51 @@ namespace StudentExercises.Controllers
             }
         }
 
-        // GET: Instructors
+        // GET: Exercises
         public ActionResult Index()
         {
-            var instructors = new List<Instructor>();
+            var exercises = new List<Exercise>();
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, FirstName, LastName, Specialty, SlackHandle, CohortId
-                        FROM Instructor
+                        SELECT Id, [Name], Language
+                        FROM Exercise
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        instructors.Add(new Instructor()
+                        exercises.Add(new Exercise()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            Specialty = reader.GetString(reader.GetOrdinal("Specialty")),
-                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"))
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Language = reader.GetString(reader.GetOrdinal("Language"))
+                            
                         });
                     }
                     reader.Close();
                 }
             }
 
-            return View(instructors);
+            return View(exercises);
         }
 
-        // GET: Instructors/Details/5
+        // GET: Exercises/Details/5
         public ActionResult Details(int id)
         {
-            Instructor student = null;
+            Exercise exercise = null;
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, FirstName, LastName, Specialty, SlackHandle, CohortId
-                        FROM Instructor
+                        SELECT Id, [Name], Language
+                        FROM Exercise
                         WHERE Id = @id
                     ";
 
@@ -83,34 +81,31 @@ namespace StudentExercises.Controllers
 
                     if (reader.Read())
                     {
-                        student = new Instructor()
+                        exercise = new Exercise()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            Specialty = reader.GetString(reader.GetOrdinal("Specialty")),
-                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Language = reader.GetString(reader.GetOrdinal("Language"))
                         };
                     }
                 }
             }
 
-            return View(student);
+            return View(exercise);
         }
 
-        //// GET: Instructors/Create
+        //// GET: Exercises/Create
         //[HttpGet]
         //public ActionResult Create()
         //{
-        //    var viewModel = new InstructorCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+        //    var viewModel = new ExerciseCreateViewModel(_config.GetConnectionString("DefaultConnection"));
         //    return View(viewModel);
         //}
 
-        // POST: Instructors/Create
+        // POST: Exercises/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Instructor student)
+        public ActionResult Create(Exercise exercise)
         {
             try
             {
@@ -121,31 +116,21 @@ namespace StudentExercises.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            INSERT INTO Instructor (
-                                FirstName, 
-                                LastName, 
-                                SlackHandle,
-                                Specialty,
-                                CohortId
+                            INSERT INTO Exercise (
+                                [Name], 
+                                Language
                             ) VALUES (
-                                @firstName,
-                                @lastName,
-                                @slackHandle,
-                                @specialty,
-                                @cohortId
+                                @name,
+                                @language
                             )
                         ";
 
-                        cmd.Parameters.AddWithValue("@firstName", student.FirstName);
-                        cmd.Parameters.AddWithValue("@lastName", student.LastName);
-                        cmd.Parameters.AddWithValue("@slackHandle", student.SlackHandle);
-                        cmd.Parameters.AddWithValue("@specialty", student.Specialty);
-                        cmd.Parameters.AddWithValue("@cohortId", student.CohortId);
+                        cmd.Parameters.AddWithValue("@name", exercise.Name);
+                        cmd.Parameters.AddWithValue("@language", exercise.Language);
 
                         cmd.ExecuteNonQuery();
                     }
                 }
-
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -154,16 +139,16 @@ namespace StudentExercises.Controllers
             }
         }
 
-        // GET: Instructors/Edit/5
+        // GET: Exercises/Edit/5
         public ActionResult Edit(int id)
         {
             return View();
         }
 
-        // POST: Instructors/Edit/5
+        // POST: Exercises/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Exercise exercise)
         {
             try
             {
@@ -177,16 +162,16 @@ namespace StudentExercises.Controllers
             }
         }
 
-        // GET: Instructors/Delete/5
+        // GET: Exercises/Delete/5
         public ActionResult Delete(int id)
         {
             return View();
         }
 
-        // POST: Instructors/Delete/5
+        // POST: Exercises/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Exercise exercise)
         {
             try
             {
